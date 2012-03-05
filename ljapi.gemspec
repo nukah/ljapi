@@ -1,5 +1,5 @@
 require 'rake'
-Gem::Specifications.new do |gem|
+Gem::Specification.new do |gem|
     gem.name            = "Live Journal XML-RPC API"
     gem.files           = FileList['lib/**/*.rb']
     gem.platform        = Gem::Platform::CURRENT

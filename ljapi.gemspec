@@ -6,5 +6,5 @@ Gem::Specification.new do |gem|
     gem.require_path    = '.'
     gem.summary         = 'API for accessing and working with LiveJournal'
     gem.version         = '0.0.1'
-    gem.add_runtime_dependency  'sanitized'
+    gem.add_runtime_dependency  'sanitize'
 end

@@ -51,8 +51,8 @@ module LJAPI
     end
     
     class GetPosts < Req
-      def initialize(user, options = nil)
-        super('getevents', user)
+      def initialize(username, password, options = nil)
+        super('getevents', username, password)
         @request['lineendings'] = 'unix'
         @request['noprops'] = 'true'
         @request['notags'] = 'true'

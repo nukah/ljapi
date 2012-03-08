@@ -65,6 +65,7 @@ module LJAPI
     class Challenge < Req
       def initialize
         super('getchallenge')
+        self.run
       end
 
       def run

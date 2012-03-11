@@ -7,20 +7,7 @@ module LJAPI
   module Request
     MAX_ATTEMPTS = 5
     
-    def self.time_to_ljtime(time)
-          time.strftime '%Y-%m-%d %H:%M:%S'
-    end
-        
-    def self.ljtime_to_time(str)
-          dt = DateTime.strptime(str, '%Y-%m-%d %H:%M')
-          Time.gm(dt.year, dt.mon, dt.day, dt.hour, dt.min, 0, 0)
-    end
-    
     class LJException < Exception 
-      attr_accessor :code
-      def initialize(error)
-        @code = error
-      end
     end
     
     class Req
@@ -28,10 +15,12 @@ module LJAPI
         @operation = operation
         @request = {
           'clientversion' => 'Ruby',
-          'ver' => 1
+          'ver' => '1',
+          'operation' => @operation
         }
+        @result = {}
         if username and password
-          challenge = Challenge.new
+          challenge = Challenge.new.run
           response = Digest::MD5.hexdigest(challenge + Digest::MD5.hexdigest(password))
           @request.update({
             'username' => username,
@@ -41,7 +30,6 @@ module LJAPI
             'usejournal' => username,
             })
         end
-        self.run
       end
 
       def run
@@ -51,25 +39,28 @@ module LJAPI
         attempts = 0
         begin
           attempts += 1
-          ok, res = connection.call2(event, @request)
+          result, data = connection.call2(event, @request)
         rescue EOFError, RuntimeError
           retry if(attempts < MAX_ATTEMPTS)
-        rescue Timeout::Error, Errno::ETIMEDOUT
-          return { :success => false, :data => { :error => 'timeout' } }
+        rescue Errno::ECONNREFUSED => e
+          raise LJException.new(e)
         end
-        return { :success => false, :data => { :error => 'access_error' } } if !ok
-        return { :success => true, :data => res }
+        @result.update({
+          :success  => result,
+          :data     => (result and data or data.code)
+        })
+        return @result
       end
     end
 
     class Challenge < Req
       def initialize
         super('getchallenge')
-        self.run
       end
-
+      
       def run
-        super[:data]
+        super
+        return @result[:data]['challenge']
       end
     end
   end

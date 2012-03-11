@@ -1,6 +1,7 @@
 require 'ljapi/request'
 require 'cgi'
-require 'sanitize'
+require 'json/pure'
+#require 'sanitize'
 
 module LJAPI
   module Request
@@ -58,7 +59,7 @@ module LJAPI
         @request['notags'] = 'true'
         if options and options['since']
           @request['selecttype'] = 'syncitems'
-          @request['lastsync'] = LJAPI::Request::time_to_ljtime(options['since'])
+          @request['lastsync'] = LJAPI::Utils::time_to_ljtime(options['since'])
         else
           @request['selecttype'] = 'lastn'
           @request['howmany'] = '50'
@@ -67,19 +68,22 @@ module LJAPI
       
       def run
         super
-        @posts = ResultHash.new
-        @result['events'].each { |item|
-          probe = ResultHash.new
-          probe['itemid'] = item['itemid']
-          probe['subject'] = item['subject'] and item['subject'].to_s.force_encoding('utf-8').encode or nil
-          probe['body'] = Sanitize.clean(item['event'].to_s.force_encoding('utf-8').encode)
-          probe['time'] = LJAPI::Request::ljtime_to_time(item['logtime'])
-          probe['url'] = item['url']
-          probe['sec'] = item['security'] and item['security'].to_s.force_encoding('utf-8').encode or nil
-          probe['anum'] = item['anum']
-          @posts[item['itemid']] = probe
-        }
-        @posts
+        #puts JSON.generate(@result[:data]['events'])
+        return @result[:data]['events']
+        
+        # @posts = ResultHash.new
+        #         @result['events'].each { |item|
+        #           probe = ResultHash.new
+        #           probe['itemid'] = item['itemid']
+        #           probe['subject'] = item['subject'] and item['subject'].to_s.force_encoding('utf-8').encode or nil
+        #           probe['body'] = Sanitize.clean(item['event'].to_s.force_encoding('utf-8').encode)
+        #           probe['time'] = LJAPI::Request::ljtime_to_time(item['logtime'])
+        #           probe['url'] = item['url']
+        #           probe['sec'] = item['security'] and item['security'].to_s.force_encoding('utf-8').encode or nil
+        #           probe['anum'] = item['anum']
+        #           @posts[item['itemid']] = probe
+        #         }
+        #         @posts
       end
     end
   end

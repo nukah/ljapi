@@ -68,22 +68,8 @@ module LJAPI
       
       def run
         super
-        #puts JSON.generate(@result[:data]['events'])
-        return @result[:data]['events']
-        
-        # @posts = ResultHash.new
-        #         @result['events'].each { |item|
-        #           probe = ResultHash.new
-        #           probe['itemid'] = item['itemid']
-        #           probe['subject'] = item['subject'] and item['subject'].to_s.force_encoding('utf-8').encode or nil
-        #           probe['body'] = Sanitize.clean(item['event'].to_s.force_encoding('utf-8').encode)
-        #           probe['time'] = LJAPI::Request::ljtime_to_time(item['logtime'])
-        #           probe['url'] = item['url']
-        #           probe['sec'] = item['security'] and item['security'].to_s.force_encoding('utf-8').encode or nil
-        #           probe['anum'] = item['anum']
-        #           @posts[item['itemid']] = probe
-        #         }
-        #         @posts
+        package = @result[:data]['events'].collect! { |post| post.each { |k,v| v.to_s.force_encoding('utf-8').encode }}
+        return JSON.pretty_generate(@result)
       end
     end
   end

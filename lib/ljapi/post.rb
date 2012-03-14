@@ -68,7 +68,7 @@ module LJAPI
       
       def run
         super
-        package = @result[:data]['events'].collect! { |post| post.each { |k,v| v.to_s.force_encoding('utf-8').encode }}
+        package = @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
         return JSON.generate(@result)
       end
     end

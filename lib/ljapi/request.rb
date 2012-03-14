@@ -1,7 +1,12 @@
 require 'xmlrpc/client'
 require 'digest/md5'
-require 'ljapi/user'
-require 'date'
+
+# Quick fix for JSON.generate raising TypeError in Array with Fixnums.
+class Fixnum
+  def to_json(options = nil)
+    to_s
+  end
+end
 
 module LJAPI
   module Request

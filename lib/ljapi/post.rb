@@ -1,25 +1,8 @@
 require 'ljapi/request'
 require 'cgi'
-require 'json/pure'
-#require 'sanitize'
 
 module LJAPI
   module Request
-    class ResultHash < Hash
-      def to_a
-        self.values
-      end
-      def method_missing(method, *opts)
-        m = method.to_s
-        if self.has_key?(m)
-          return self[m]
-        elsif self.has_key?(m.to_sym)
-          return self[m.to_sym]
-        end
-        super
-      end
-    end
-    
     class AddComment < Req
       def initialize(user, id, anum, text)
         super('addcomment', user)
@@ -68,7 +51,7 @@ module LJAPI
       
       def run
         super
-        package = @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
+        @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
         return @result
       end
     end

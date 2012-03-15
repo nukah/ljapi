@@ -49,7 +49,7 @@ end
 
 module LJAPI
   module Request
-    MAX_ATTEMPTS = 5
+    MAX_ATTEMPTS = @@config.protocol.lj.retry_attempts
     
     class LJException < Exception 
     end
@@ -78,7 +78,7 @@ module LJAPI
 
       def run
         connection = XMLRPC::Client.new('www.livejournal.com', '/interface/xmlrpc')
-        connection.timeout = 60
+        connection.timeout = @@config.protocol.lj.timeout
         event = 'LJ.XMLRPC'.concat('.').concat(@operation)
         attempts = 0
         begin

@@ -4,19 +4,19 @@ require 'cgi'
 module LJAPI
   module Request
     class AddComment < Req
-      def initialize(user, id, anum, text)
-        super('addcomment', user)
-        @id = id * 256 + anum
-        @text = text
+      def initialize(username, password, journal, id, subject, text)
+        super('addcomment', username, password)
         @request.update({
-          'body' => @text,
-          'ditemid' => @id
+          'journal' => journal,
+          'body' => text,
+          'ditemid' => id,
+          'subject' => subject
         })
       end
       
       def run
         super
-        @result['commentlink']
+        return @result
       end
     end
     

@@ -1,6 +1,8 @@
 require 'xmlrpc/client'
 require 'digest/md5'
 
+DEBUG = true
+
 # Quick fix for JSON.generate raising TypeError in Array with Fixnums.
 @@error_codes = {
   "Invalid username" => 100,
@@ -49,7 +51,8 @@ end
 
 module LJAPI
   module Request
-    MAX_ATTEMPTS = @@config.protocol.lj.retry_attempts
+    
+    MAX_ATTEMPTS = 5
     
     class LJException < Exception 
     end
@@ -71,14 +74,14 @@ module LJAPI
             'auth_method' => 'challenge',
             'auth_challenge' => challenge,
             'auth_response' => response,
-            'usejournal' => username,
+#            'usejournal' => username,
             })
         end
       end
 
       def run
         connection = XMLRPC::Client.new('www.livejournal.com', '/interface/xmlrpc')
-        connection.timeout = @@config.protocol.lj.timeout
+        connection.timeout = 60
         event = 'LJ.XMLRPC'.concat('.').concat(@operation)
         attempts = 0
         begin
@@ -91,8 +94,9 @@ module LJAPI
         end
         @result.update({
           :success  => result,
-          :data     => (result and data or @@error_codes[data.faultString])
+          :data     => (result and data or @@error_codes[data.faultString]),
         })
+        @result.update({:data_full => data.inspect}) if (!result and DEBUG)
         return @result
       end
     end

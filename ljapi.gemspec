@@ -9,6 +9,6 @@ Gem::Specification.new do |gem|
     gem.require_paths   = [".","lib"]
     gem.authors         = ['Mighty']
     gem.summary         = 'API for accessing and working with LiveJournal'
-    gem.version         = '0.0.4'
+    gem.version         = '0.0.5'
     gem.description     = "%q{LiveJournal XML-RPC API}"
 end

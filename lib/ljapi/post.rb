@@ -46,7 +46,7 @@ module LJAPI
         else
           @request['selecttype'] = 'lastn'
           @request['howmany'] = '50'
-          @request.merge!(options)
+          @request.merge!(options) if options
         end
       end
       

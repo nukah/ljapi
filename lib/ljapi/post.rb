@@ -51,6 +51,7 @@ module LJAPI
         if @result[:success]
             @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
         end
+        return @result
       end
     end
     

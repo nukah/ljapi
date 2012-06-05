@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 
 module Utils
   def self.time_to_ljtime(time)

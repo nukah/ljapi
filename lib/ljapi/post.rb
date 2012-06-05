@@ -41,6 +41,7 @@ module LJAPI
         @request['notags'] = 'true'
         @request['itemid'] = (post_id/256).to_i
         @request['usejournal'] = journal_id.to_s
+        @request.merge!(options) if options and optins.kind_of?(Hash)
       end
       
       def run

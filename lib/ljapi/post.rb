@@ -40,6 +40,7 @@ module LJAPI
         super('getevents', username, password)
         @request['selecttype'] = 'one'
         @request['notags'] = 'true'
+        @request['noprops'] = 'true'
         @request['itemid'] = (post_id.to_i/256).to_i
         @request['usejournal'] = journal_id.to_s
         @request.merge!(options) if options and optins.kind_of?(Hash)

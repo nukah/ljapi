@@ -51,6 +51,7 @@ module LJAPI
         super
         if @result[:success]
             @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
+            @result[:data]['events'].each { |post| post.store('censored', LJAPI::Utils.check_censore(post['event'])) }
         end
         return @result
       end

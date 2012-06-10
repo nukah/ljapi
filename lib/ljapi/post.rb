@@ -1,5 +1,6 @@
 # -*- encoding : utf-8 -*-
 require 'ljapi/request'
+require 'ljapi/utils'
 require 'cgi'
 
 module LJAPI
@@ -64,7 +65,7 @@ module LJAPI
         @request['parseljtags'] = 'true'
         if options and options.kind_of?(Hash) and options['since']
           @request['selecttype'] = 'syncitems'
-          @request['lastsync'] = LJAPI::Utils::time_to_ljtime(options['since'])
+          @request['lastsync'] = LJAPI::Utils.time_to_ljtime(options['since'])
           @request.merge!(options)
         else
           @request['selecttype'] = 'lastn'
@@ -76,7 +77,8 @@ module LJAPI
       def run
         super
         if @result[:success]
-          @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
+          @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s;v.to_s.force_encoding('utf-8').encode } }
+          @result[:data]['events'].each { |post| post.store('censored', LJAPI::Utils.check_censore(post['event'])) }
         end
         return @result
       end

@@ -1,4 +1,5 @@
 $:.push File.expand_path("../lib", __FILE__)
+version = File.read(File.expand_path("../VERSION",__FILE__)).strip
 
 Gem::Specification.new do |gem|
     gem.name            = "ljapi"
@@ -9,6 +10,6 @@ Gem::Specification.new do |gem|
     gem.require_paths   = [".","lib"]
     gem.authors         = ['Mighty']
     gem.summary         = 'API for accessing and working with LiveJournal'
-    gem.version         = '0.0.8'
+    gem.version         = version
     gem.description     = "%q{LiveJournal XML-RPC API}"
 end

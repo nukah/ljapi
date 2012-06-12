@@ -10,7 +10,7 @@ module LJAPI
       Time.gm(dt.year, dt.mon, dt.day, dt.hour, dt.min, 0, 0)
     end
     def self.check_censore(text)
-      return @@pattern.match(text) ? true : false
+      return @@pattern.match(text.to_s) ? true : false
     end
   end
 end

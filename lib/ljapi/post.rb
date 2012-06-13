@@ -5,6 +5,28 @@ require 'cgi'
 
 module LJAPI
   module Request
+
+    class AddPost < Req
+      def initialize(username, password, subject, text, options = nil)
+        super('postevent', username, password)
+        @request.update({
+          'event'     => text,
+          'subject'   => subject,
+          'year'      => DateTime.now.year,
+          'mon'       => DateTime.now.mon,
+          'day'       => DateTime.now.day,
+          'hour'      => DateTime.now.hour,
+          'min'       => DateTime.now.min
+        })
+        @request.merge!(options) if options
+      end
+
+      def run
+        super
+        return @result
+      end
+    end
+
     class AddComment < Req
       def initialize(username, password, journal, id, subject, text)
         super('addcomment', username, password)
@@ -23,11 +45,11 @@ module LJAPI
     end
     
     class EditPost < Req
-      def initialize(user, id, options)
+      def initialize(user, id, options = nil)
         super('editevent', user)
         @id = id
         @request.update({ 'itemid' => @id })
-        @request.update(options) if options
+        @request.merge!(options) if options and optins.kind_of?(Hash)
       end
       
       def run
@@ -39,11 +61,13 @@ module LJAPI
     class GetPost < Req
       def initialize(username, password, journal_id, post_id, options = nil)
         super('getevents', username, password)
-        @request['selecttype'] = 'one'
-        @request['notags'] = 'true'
-        @request['noprops'] = 'true'
-        @request['itemid'] = (post_id.to_i/256).to_i
-        @request['usejournal'] = journal_id.to_s
+        @request.update({
+          'selecttype'  => 'one',
+          'notags'      => 'true',
+          'noprops'     => 'true',
+          'itemid'      => (post_id != -1 and post_id.to_i or -1),
+          'usejournal'  => journal_id.to_s
+        })
         @request.merge!(options) if options and optins.kind_of?(Hash)
       end
       
@@ -58,21 +82,31 @@ module LJAPI
     end
     
     class GetPosts < Req
-      def initialize(username, password, options = nil)
+      def initialize(username, password, options = {})
         super('getevents', username, password)
-        @request['lineendings'] = 'unix'
-        @request['noprops'] = 'true'
-        @request['notags'] = 'true'
-        @request['parseljtags'] = 'true'
-        if options and options.kind_of?(Hash) and options['since']
-          @request['selecttype'] = 'syncitems'
-          @request['lastsync'] = LJAPI::Utils.time_to_ljtime(options['since'])
-          @request.merge!(options)
+        @request.update({
+          'lineendings'   => 'unix',
+          'noprops'       => 'true',
+          'notags'        => 'true',
+          'parseljtags'   => 'true'
+        })
+        if options.has_key?('since')
+          @request.update({
+            'selecttype'  => 'syncitems',
+            'lastsync'    => LJAPI::Utils.time_to_ljtime(options['since'])
+          })
+          options.delete('since')
+        elsif options.has_key?('itemids')
+          @request.update({
+            'selecttype'  => 'multiple'
+           })
         else
-          @request['selecttype'] = 'lastn'
-          @request['howmany'] = '50'
-          @request.merge!(options) if options
+          @request.update({
+            'selecttype'  => 'lastn',
+            'howmany'     => '50'
+          })
         end
+        @request.merge!(options)
       end
       
       def run
@@ -84,5 +118,6 @@ module LJAPI
         return @result
       end
     end
+
   end
 end

@@ -75,7 +75,6 @@ module LJAPI
             'auth_method' => 'challenge',
             'auth_challenge' => challenge,
             'auth_response' => response,
-#            'usejournal' => username,
             })
         end
       end

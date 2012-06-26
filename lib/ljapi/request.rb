@@ -69,9 +69,9 @@ module LJAPI
         @result = {}
         if username and password
           challenge = Challenge.new.run
-          response = Digest::MD5.hexdigest(challenge + password)
+          response = Digest::MD5.hexdigest(challenge + password.to_s)
           @request.update({
-            'username' => username,
+            'username' => username.to_s,
             'auth_method' => 'challenge',
             'auth_challenge' => challenge,
             'auth_response' => response,

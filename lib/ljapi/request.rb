@@ -100,7 +100,7 @@ module LJAPI
         return @result
       end
     end
-
+    
     class Challenge < Req
       def initialize
         super('getchallenge')

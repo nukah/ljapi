@@ -3,18 +3,17 @@ require 'ljapi/request'
 
 module LJAPI
   module Request
-    class Login < Req
-      def initialize(user)
-        super('login', user)
+    
+    class AccessCheck < Req
+      def initialize(username, password)
+        super('sessiongenerate', username, password)
       end
-
-
+      
       def run
         super
-        u = @user
-        u.fullname = @result['fullname']
-        u
+        return @result
       end
     end
+    
   end
 end

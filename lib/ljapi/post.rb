@@ -28,13 +28,13 @@ module LJAPI
     end
 
     class AddComment < Req
-      def initialize(username, password, journal, id, subject, text)
+      def initialize(username, password, journal = nil, id, subject, text)
         super('addcomment', username, password)
+        @request.update({ 'journal' => journal }) if journal
         @request.update({
-          'journal' => journal,
-          'body' => text.truncate(4299),
+          'body' => text.slice(0,4299),
           'ditemid' => id,
-          'subject' => subject.truncate(100)
+          'subject' => subject.slice(0,100)
         })
       end
       
@@ -47,9 +47,8 @@ module LJAPI
     class EditPost < Req
       def initialize(user, id, options = nil)
         super('editevent', user)
-        @id = id
-        @request.update({ 'itemid' => @id })
-        @request.merge!(options) if options and optins.kind_of?(Hash)
+        @request.update({ 'itemid' => id })
+        @request.merge!(options) if options and options.kind_of?(Hash)
       end
       
       def run
@@ -68,7 +67,7 @@ module LJAPI
           'itemid'      => (post_id != -1 and post_id.to_i or -1),
           'usejournal'  => journal_id.to_s
         })
-        @request.merge!(options) if options and optins.kind_of?(Hash)
+        @request.merge!(options) if options and options.kind_of?(Hash)
       end
       
       def run

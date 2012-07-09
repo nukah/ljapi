@@ -32,9 +32,9 @@ module LJAPI
         super('addcomment', username, password)
         @request.update({
           'journal' => journal,
-          'body' => text,
+          'body' => text.truncate(4299),
           'ditemid' => id,
-          'subject' => subject
+          'subject' => subject.truncate(100)
         })
       end
       

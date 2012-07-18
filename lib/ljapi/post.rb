@@ -5,7 +5,33 @@ require 'cgi'
 
 module LJAPI
   module Request
-
+    class Encode
+      def self.to_proc
+        lambda { |post|
+          post.each { |k,v| 
+            k.to_s
+            v.to_s.force_encoding('utf-8').encode 
+          }
+        }
+      end
+    end
+    
+    class Censore
+      def self.to_proc
+        lambda { |post|
+          post.update({'censored' => LJAPI::Utils.check_censore(post['event'])})
+        }
+      end
+    end
+    
+    class DeEmbed
+      def self.to_proc
+        lambda { |post| 
+          LJAPI::Utils.check_video(post['event'])
+        }
+      end
+    end
+    
     class AddPost < Req
       def initialize(username, password, subject, text, options = nil)
         super('postevent', username, password)
@@ -87,7 +113,7 @@ module LJAPI
           'lineendings'   => 'unix',
           'noprops'       => 'true',
           'notags'        => 'true',
-          'parseljtags'   => 'true'
+          'parseljtags'   => 'false'
         })
         if options.has_key?('since')
           @request.update({
@@ -111,8 +137,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-          @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s;v.to_s.force_encoding('utf-8').encode } }
-          @result[:data]['events'].each { |post| post.store('censored', LJAPI::Utils.check_censore(post['event'])) }
+          @result[:data]['events'].map!(&Encode).map!(&Censore).reject!(&DeEmbed)
         end
         return @result
       end

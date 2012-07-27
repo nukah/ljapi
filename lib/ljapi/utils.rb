@@ -12,11 +12,14 @@ module LJAPI
       dt = DateTime.strptime(str, '%Y-%m-%d %H:%M')
       Time.gm(dt.year, dt.mon, dt.day, dt.hour, dt.min, 0, 0)
     end
-    def self.check_censore(text)
-      return CENSORE.match(text.to_s) ? true : false
+    def self.check_censore(post)
+      return CENSORE.match(post['event'].to_s) ? true : false
     end
-    def self.check_video(text)
-      return VIDEO.match(text.to_s) ? true : false
+    def self.check_video(post)
+      return VIDEO.match(post['event'].to_s) ? true : false
+    end
+    def self.allow_comments(props)
+      return (props.include?('opt_nocomments') ? false : true) if props
     end
   end
 end

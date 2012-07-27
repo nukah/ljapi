@@ -19,7 +19,7 @@ module LJAPI
     class Censore
       def self.to_proc
         lambda { |post|
-          post.update({'censored' => LJAPI::Utils.check_censore(post['event'])})
+          post.update({ 'censored' => LJAPI::Utils.check_censore(post) })
         }
       end
     end
@@ -27,7 +27,17 @@ module LJAPI
     class DeEmbed
       def self.to_proc
         lambda { |post| 
-          LJAPI::Utils.check_video(post['event'])
+          LJAPI::Utils.check_video(post)
+        }
+      end
+    end
+    
+    class Properties
+      def self.to_proc
+        lambda { |post|
+          props = post['props']
+          post.delete('props')
+          post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(props) })
         }
       end
     end
@@ -99,8 +109,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-            @result[:data]['events'].collect! { |post| post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }}
-            @result[:data]['events'].each { |post| post.store('censored', LJAPI::Utils.check_censore(post['event'])) }
+            @result[:data]['events'].map!(&Encode).map!(&Censore).reject!(&DeEmbed)
         end
         return @result
       end
@@ -111,7 +120,7 @@ module LJAPI
         super('getevents', username, password)
         @request.update({
           'lineendings'   => 'unix',
-          'noprops'       => 'true',
+          #'noprops'       => 'false',
           'notags'        => 'true',
           'parseljtags'   => 'false'
         })
@@ -137,7 +146,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-          @result[:data]['events'].map!(&Encode).map!(&Censore).reject!(&DeEmbed)
+          @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
         end
         return @result
       end

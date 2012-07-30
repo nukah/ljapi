@@ -36,8 +36,10 @@ module LJAPI
       def self.to_proc
         lambda { |post|
           props = post['props']
+          created = LJAPI::Utils.ljtime_to_time(post['eventtime'])
           post.delete('props')
           post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(props) })
+          post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(props,created) })
         }
       end
     end
@@ -151,6 +153,5 @@ module LJAPI
         return @result
       end
     end
-
   end
 end

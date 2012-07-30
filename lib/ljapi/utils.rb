@@ -21,5 +21,13 @@ module LJAPI
     def self.allow_comments(props)
       return (props.include?('opt_nocomments') ? false : true) if props
     end
+    def self.last_edit(props, postdate)
+      if props.include?('revtime')
+        updated = Time.at(props['revtime']).strftime('%Y-%m-%d %H:%M:%S').to_s
+      else
+        updated = postdate
+      end
+      return updated
+    end
   end
 end

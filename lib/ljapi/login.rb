@@ -3,7 +3,6 @@ require 'ljapi/request'
 
 module LJAPI
   module Request
-    
     class AccessCheck < Req
       def initialize(username, password)
         super('sessiongenerate', username, password)
@@ -15,6 +14,5 @@ module LJAPI
         return @result
       end
     end
-    
   end
 end

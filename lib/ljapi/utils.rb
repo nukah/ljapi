@@ -29,5 +29,8 @@ module LJAPI
       end
       return updated
     end
+    def self.convert_urls(post, journal)
+      post.update({ 'url' => "//#{journal}.livejournal.com/#{post['ditemid']}.html"})
+    end
   end
 end

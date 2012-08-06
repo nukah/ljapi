@@ -1,7 +1,6 @@
 # -*- encoding : utf-8 -*-
 require 'ljapi/request'
 require 'ljapi/utils'
-require 'cgi'
 
 module LJAPI
   module Request
@@ -119,10 +118,10 @@ module LJAPI
     
     class GetPosts < Req
       def initialize(username, password, options = {})
+        @username = username
         super('getevents', username, password)
         @request.update({
           'lineendings'   => 'unix',
-          #'noprops'       => 'false',
           'notags'        => 'true',
           'parseljtags'   => 'false'
         })
@@ -148,6 +147,9 @@ module LJAPI
       def run
         super
         if @result[:success]
+          # Dirty workaround for 06.08.2012 url change
+          # TODO: better conversion
+          @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
           @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
         end
         return @result

@@ -96,6 +96,7 @@ module LJAPI
     
     class GetPost < Req
       def initialize(username, password, journal_id, post_id, options = nil)
+        @username = username
         super('getevents', username, password)
         @request.update({
           'selecttype'  => 'one',
@@ -110,6 +111,7 @@ module LJAPI
       def run
         super
         if @result[:success]
+            @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
             @result[:data]['events'].map!(&Encode).map!(&Censore).reject!(&DeEmbed)
         end
         return @result

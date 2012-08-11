@@ -96,7 +96,7 @@ module LJAPI
     
     class GetPost < Req
       def initialize(username, password, journal_id, post_id, options = nil)
-        @username = username
+        @username = journal_id
         super('getevents', username, password)
         @request.update({
           'selecttype'  => 'one',

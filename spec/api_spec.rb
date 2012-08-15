@@ -39,10 +39,9 @@ describe 'LiveJournal API' do
 		end
 
 		it "should retrieve posts since specific date" do
-			results = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password], { 'since' => '06.03.2012' }).run
-			results[:data]['events'].size.should be > 3
-			results[:data]['events'].first['itemid'].should == 4
-			Date.parse(results[:data]['events'].first['eventtime']).should be >= Date.parse('06.03.2012')
+			result = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password], { 'since' => '06.03.2012' }).run
+			result[:data]['events'].first['itemid'].should == 4
+			Date.parse(result[:data]['events'].first['eventtime']).should be >= Date.parse('06.03.2012')
 		end
 
 	end

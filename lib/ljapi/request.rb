@@ -87,7 +87,7 @@ module LJAPI
         begin
           attempts += 1
           result, data = connection.call2(event, @request)
-          data.delete('skip')
+          data.delete('skip') if data.class == Hash && data.key?('skip')
         rescue EOFError, RuntimeError
           retry if(attempts < MAX_ATTEMPTS)
         rescue Errno::ECONNREFUSED => e

@@ -101,7 +101,7 @@ module LJAPI
         @request.update({
           'selecttype'  => 'one',
           'notags'      => 'true',
-          'noprops'     => 'true',
+          'noprops'     => 'false',
           'itemid'      => (post_id != -1 and post_id.to_i or -1),
           'usejournal'  => journal_id.to_s
         })

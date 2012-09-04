@@ -2,7 +2,7 @@
 require 'xmlrpc/client'
 require 'digest/md5'
 
-DEBUG = true
+DEBUG = false
 
 # Quick fix for JSON.generate raising TypeError in Array with Fixnums.
 @@error_codes = {

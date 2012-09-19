@@ -42,6 +42,8 @@ module LJAPI
         }
       end
     end
+
+
     
     class AddPost < Req
       def initialize(username, password, subject, text, options = nil)
@@ -101,7 +103,6 @@ module LJAPI
         @request.update({
           'selecttype'  => 'one',
           'notags'      => 'true',
-          'noprops'     => 'false',
           'itemid'      => (post_id != -1 and post_id.to_i or -1),
           'usejournal'  => journal_id.to_s
         })
@@ -112,7 +113,7 @@ module LJAPI
         super
         if @result[:success]
             @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
-            @result[:data]['events'].map!(&Encode).map!(&Censore).reject!(&DeEmbed)
+            @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
         end
         return @result
       end

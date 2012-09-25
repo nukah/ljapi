@@ -19,7 +19,7 @@ module LJAPI
       return VIDEO.match(post['event'].to_s) ? true : false
     end
     def self.allow_comments(props)
-      return (props.include?('opt_nocomments') or props.include?('opt_lockcomments') ? false : true) if props
+      return (props.include?('opt_nocomments') or props.include?('opt_lockcomments') ? true : false) if props
     end
     def self.last_edit(props, postdate)
       if props.include?('revtime')

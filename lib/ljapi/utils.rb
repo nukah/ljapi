@@ -34,7 +34,7 @@ module LJAPI
       end
       def get_tags(props)
         tags = []
-        tags = props['taglist'].split(',') if props.include?('taglist')
+        tags = props['taglist'].split(',').map { |tag| tag.force_encoding('utf-8').encode.gsub(" ", "") } if props.include?('taglist')
         return tags
       end
     end

@@ -39,6 +39,7 @@ module LJAPI
           post.delete('props')
           post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(props) })
           post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(props,created) })
+          post.update({ 'tags' => LJAPI::Utils.get_tags(props) })
         }
       end
     end
@@ -102,7 +103,8 @@ module LJAPI
         super('getevents', username, password)
         @request.update({
           'selecttype'  => 'one',
-          'notags'      => 'true',
+          'notags'      => 'false',
+          'parseljtags' => 'true',
           'itemid'      => (post_id != -1 and post_id.to_i or -1),
           'usejournal'  => journal_id.to_s
         })
@@ -125,8 +127,8 @@ module LJAPI
         super('getevents', username, password)
         @request.update({
           'lineendings'   => 'unix',
-          'notags'        => 'true',
-          'parseljtags'   => 'false'
+          'notags'        => 'false',
+          'parseljtags'   => 'true'
         })
         if options.has_key?('since')
           @request.update({
@@ -150,8 +152,6 @@ module LJAPI
       def run
         super
         if @result[:success]
-          # Dirty workaround for 06.08.2012 url change
-          # TODO: better conversion
           @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
           @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
         end

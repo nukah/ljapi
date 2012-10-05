@@ -32,6 +32,11 @@ module LJAPI
       def convert_urls(post, journal)
         post.update({ 'url' => "//#{journal}.livejournal.com/#{post['ditemid']}.html"})
       end
+      def get_tags(props)
+        tags = []
+        tags = props['taglist'].split(',') if props.include?('taglist')
+        return tags
+      end
     end
   end
 end

@@ -136,7 +136,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-          return @result[:data][:events].first[:itemid].to_i
+          return @result[:data]["events"][0]["itemid"].to_i
         else
           throw Exception.new('failure')
         end

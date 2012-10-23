@@ -26,7 +26,7 @@ module LJAPI
     class DeEmbed
       def self.to_proc
         lambda { |post| 
-          LJAPI::Utils.check_video(post)
+          return LJAPI::Utils.check_video(post)
         }
       end
     end
@@ -118,6 +118,28 @@ module LJAPI
             @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
         end
         return @result
+      end
+    end
+
+    class CountPosts < Req
+      def initialize(username, password)
+        super('getevents', username, password)
+        @request.update({
+          'selecttype'  => 'one',
+          'notags'      => 'true',
+          'parseljtags' => 'false',
+          'itemid'      => -1,
+          'usejournal'  => username
+        })
+      end
+
+      def run
+        super
+        if @result[:success]
+          return @result[:data][:events].first[:itemid].to_i
+        else
+          throw Exception.new('failure')
+        end
       end
     end
     

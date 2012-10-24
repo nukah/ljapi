@@ -1,5 +1,5 @@
 $:.push File.expand_path("../lib", __FILE__)
-version = File.read(File.expand_path("../VERSION",__FILE__)).strip
+version = `git describe | awk -F'-g[0-9a-fA-F]+' '{print $1}'`
 
 Gem::Specification.new do |gem|
     gem.name            = "ljapi"

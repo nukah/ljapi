@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
-require 'xmlrpc/client'
-require 'digest/md5'
+require "xmlrpc/client"
+require "digest/md5"
 
 DEBUG = false
 
@@ -22,6 +22,7 @@ DEBUG = false
   "Message looks like spam" => 214,
   
   "Don't have access to requested journal" => 300,
+  "Unknown Error" => 302,
   "Action forbidden; account is suspended" => 305,
   "Selected journal no longer exists" => 307,
   "Account is locked and cannot be used" => 308,
@@ -44,53 +45,46 @@ DEBUG = false
   "Journal sync is temporarily unavailable" => 506
 }
 
-class Fixnum
-  def to_json(options = nil)
-    to_s
-  end
-end
-
 module LJAPI
   module Request
     
     MAX_ATTEMPTS = 5
     
-    class LJException < Exception 
+    class LJException < Exception
     end
     
     class Req
       def initialize(operation, username = nil, password = nil)
         @operation = operation
         @request = {
-          'clientversion' => 'Ruby',
-          'ver' => '1',
-          'operation' => @operation
+          "clientversion" => "Ruby",
+          "ver" => "1",
+          "operation" => @operation,
         }
         @result = {}
         if username and password
           challenge = Challenge.new.run
           response = Digest::MD5.hexdigest(challenge + password.to_s)
           @request.update({
-            'username' => username.to_s,
-            'auth_method' => 'challenge',
-            'auth_challenge' => challenge,
-            'auth_response' => response,
+            "username" => username.to_s,
+            "auth_method" => "challenge",
+            "auth_challenge" => challenge,
+            "auth_response" => response,
             })
         end
       end
 
       def run
-        connection = XMLRPC::Client.new('www.livejournal.com', '/interface/xmlrpc')
+        connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
         connection.timeout = 60
-        event = 'LJ.XMLRPC'.concat('.').concat(@operation)
+        event = "LJ.XMLRPC.#{@operation}"
         attempts = 0
         begin
           attempts += 1
           result, data = connection.call2(event, @request)
-          data.delete('skip') if data.class == Hash && data.key?('skip')
-        rescue EOFError, RuntimeError
+          data.delete("skip") if data.class == Hash && data.key?("skip")
+        rescue EOFError, RuntimeError, Errno::ECONNREFUSED => e
           retry if(attempts < MAX_ATTEMPTS)
-        rescue Errno::ECONNREFUSED => e
           raise LJException.new(e)
         end
         @result.update({
@@ -104,12 +98,12 @@ module LJAPI
     
     class Challenge < Req
       def initialize
-        super('getchallenge')
+        super("getchallenge")
       end
       
       def run
         super
-        return @result[:data]['challenge']
+        return @result[:data]["challenge"]
       end
     end
   end

@@ -138,14 +138,14 @@ module LJAPI
         if @result[:success]
           return @result[:data]["events"][0]["itemid"].to_i
         else
-          throw Exception.new('failure')
+          @result[:data] = "failure"
+          return @result
         end
       end
     end
     
     class GetPosts < Req
       def initialize(username, password, options = {})
-        @username = username
         super('getevents', username, password)
         @request.update({
           'lineendings'   => 'unix',
@@ -172,13 +172,48 @@ module LJAPI
       end
       
       def run
+        return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
         super
         if @result[:success]
-          @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
+          @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @request['username']) }
           @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
+         LJAPI::Cache.save(@request, @result)
         end
         return @result
       end
+    end
+
+    class ImportPosts < Req
+      def initialize(username, password)
+        @username = username
+        @password = password
+        super('getevents', username, password)
+        @request.update({
+          'lineendings'   => 'unix',
+          'notags'        => 'false',
+          'parseljtags'   => 'true'
+        })
+        @journal_count = LJAPI::Request::CountPosts.new(username, password).run
+        @journal_items = (1..@journal_count).to_a
+        @journal_posts = []
+      end
+
+      def run
+        return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
+        if @journal_count > 100
+          while @journal_items.length > 0 do
+            @journal_posts.insert(-1, LJAPI::Request::GetPosts.new(@username, @password, { 
+              'itemids' => @journal_items.slice!(0,100).join(',') 
+            }).run[:data]['events'])
+          end
+          @result = { :success => true, :data => { 'events' => @journal_posts.flatten }}
+        else
+          @result = LJAPI::Request::GetPosts.new(@username,@password).run
+        end
+        LJAPI::Cache.save(@request, @result)
+        return @result
+      end
+
     end
   end
 end

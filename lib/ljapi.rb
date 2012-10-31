@@ -6,7 +6,7 @@ require 'connection_pool'
 require 'dalli'
 
 module LJAPI
-	class Cache
+	module Cache
 		CACHE_OPS = %w[getposts importposts]
 		def self.store=(options)
 			if options.is_a?(Hash)

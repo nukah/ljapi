@@ -12,4 +12,7 @@ Gem::Specification.new do |gem|
     gem.summary         = 'API for accessing and working with LiveJournal'
     gem.version         = version
     gem.description     = "%q{LiveJournal XML-RPC API}"
+
+    gem.add_dependency('dalli', '>= 2.3.0')
+    gem.add_dependency('connection_pool', '>= 0.9.2')
 end

@@ -199,7 +199,6 @@ module LJAPI
       end
 
       def run
-        return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
         if @journal_count > 100
           while @journal_items.length > 0 do
             @journal_posts.insert(-1, LJAPI::Request::GetPosts.new(@username, @password, { 
@@ -210,7 +209,6 @@ module LJAPI
         else
           @result = LJAPI::Request::GetPosts.new(@username,@password).run
         end
-        LJAPI::Cache.save(@request, @result)
         return @result
       end
 

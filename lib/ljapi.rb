@@ -7,6 +7,7 @@ require 'dalli'
 
 module LJAPI
 	class Cache
+		CACHE_OPS = %w[getposts importposts]
 		def self.store=(options)
 			if options.is_a?(Hash)
 				url = options[:url] || "localhost:11211"
@@ -33,17 +34,23 @@ module LJAPI
 		end
 
 		def self.check_request(request)
-			cache_key = "#{request['operation']}:#{request['username']}"
-			@cache.with_connection do |cache|
-				@result = cache.get(cache_key)
+			if CACHE_OPS.include?(request['operation'])
+				cache_key = "#{request['operation']}:#{request['username']}"
+				@cache.with_connection do |cache|
+					@result = cache.get(cache_key)
+				end
+				return @result.nil? ? false : true
+			else
+				return false
 			end
-			return @result.nil? ? false : true
 		end
 
 		def self.save(request, result)
-			cache_key = "#{request['operation']}:#{request['username']}"
-			@cache.with_connection do |cache|
-				cache.set(cache_key, result)
+			if CACHE_OPS.include?(request['operation'])
+				cache_key = "#{request['operation']}:#{request['username']}"
+				@cache.with_connection do |cache|
+					cache.set(cache_key, result)
+				end
 			end
 		end
 

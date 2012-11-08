@@ -27,17 +27,23 @@ module LJAPI
 		end
 
 		def self.perform(action, operation, username, value = nil)
-			if defined?(@@cache) && !@@cache.nil?
-				@@cache.send(action, "#{operation}:#{username}", value) if CACHE_OPS.include?(operation)
+			begin
+				if defined?(@@cache) && !@@cache.nil?
+					return @@cache.send(action, "#{operation}:#{username}", value) if CACHE_OPS.include?(operation)
+				end
+			rescue Dalli::RingError
+				nil
+			ensure
+				nil
 			end
 		end
 
 		def self.get(request)
-			self.perform(:get, "#{request['operation']}", "#{request['username']}")
+			perform(:get, "#{request['operation']}", "#{request['username']}")
 		end
 
 		def self.check_request(request)
-			self.perform(:get, "#{request['operation']}", "#{request['username']}").nil? ? false : true
+			perform(:get, "#{request['operation']}", "#{request['username']}").nil? ? false : true
 		end
 
 		def self.save(request, result)

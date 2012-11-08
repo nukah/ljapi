@@ -2,13 +2,12 @@
 require 'ljapi/request'
 require 'ljapi/login'
 require 'ljapi/post'
-require 'connection_pool'
 require 'dalli'
 
 module LJAPI
-	module Cache
+	class Cache
 		CACHE_OPS = %w[getposts importposts]
-		def self.store=(options)
+		def self.store(options)
 			if options.is_a?(Hash)
 				url = options[:url] || "localhost:11211"
 				expires = options[:expires] || 5*60
@@ -17,41 +16,32 @@ module LJAPI
 				password = options[:password] || nil
 			end
 
-			@cache = ConnectionPool.new(:timeout => 1, :size => 5) do
-				Dalli::Client.new(url, :expires_in => expires, 
+			@@cache = Dalli::Client.new(url, :expires_in => expires, 
 									   :socket_timeout => socket_timeout,
 									   :username => username, 
 									   :password => password)
+		end
+
+		def self.cache
+			@@cache
+		end
+
+		def self.perform(action, operation, username, value = nil)
+			if defined?(@@cache) && !@@cache.nil?
+				@@cache.send(action, "#{operation}:#{username}", value) if CACHE_OPS.include?(operation)
 			end
 		end
 
 		def self.get(request)
-			cache_key = "#{request['operation']}:#{request['username']}"
-			@cache.with_connection do |cache|
-				@result = cache.get(cache_key)
-			end
-			return @result
+			self.perform(:get, "#{request['operation']}", "#{request['username']}")
 		end
 
 		def self.check_request(request)
-			if CACHE_OPS.include?(request['operation'])
-				cache_key = "#{request['operation']}:#{request['username']}"
-				@cache.with_connection do |cache|
-					@result = cache.get(cache_key)
-				end
-				return @result.nil? ? false : true
-			else
-				return false
-			end
+			self.perform(:get, "#{request['operation']}", "#{request['username']}").nil? ? false : true
 		end
 
 		def self.save(request, result)
-			if CACHE_OPS.include?(request['operation'])
-				cache_key = "#{request['operation']}:#{request['username']}"
-				@cache.with_connection do |cache|
-					cache.set(cache_key, result)
-				end
-			end
+			perform(:set, "#{request['operation']}", "#{request['username']}", result)
 		end
 
 		def self.configure

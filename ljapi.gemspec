@@ -1,5 +1,5 @@
 $:.push File.expand_path("../lib", __FILE__)
-version = `git describe | awk -F'-g[0-9a-fA-F]+' '{print $1}'`
+version = `git describe --abbrev=0 | awk -F'-g[0-9a-fA-F]+' '{print $1}'`
 
 Gem::Specification.new do |gem|
     gem.name            = "ljapi"
@@ -10,9 +10,8 @@ Gem::Specification.new do |gem|
     gem.require_paths   = [".","lib"]
     gem.authors         = ['Mighty']
     gem.summary         = 'API for accessing and working with LiveJournal'
-    gem.version         = version
+    gem.version         = 0.3
     gem.description     = "%q{LiveJournal XML-RPC API}"
 
     gem.add_dependency('dalli', '>= 2.3.0')
-    gem.add_dependency('connection_pool', '>= 0.9.2')
 end

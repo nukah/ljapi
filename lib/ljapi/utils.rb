@@ -37,6 +37,11 @@ module LJAPI
         tags = props['taglist'].split(',').map { |tag| tag.force_encoding('utf-8').encode.gsub(" ", "") } if props.include?('taglist')
         return tags
       end
+      def version
+        v = `git describe --long`
+        v.gsub('\n','')
+        v
+      end
     end
   end
 end

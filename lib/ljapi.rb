@@ -9,11 +9,11 @@ module LJAPI
 		CACHE_OPS = %w[getposts importposts]
 		def self.store(options)
 			if options.is_a?(Hash)
-				url = options[:url] || "localhost:11211"
+				url = options[:url]
 				expires = options[:expires] || 5*60
 				socket_timeout = options[:socket_timeout] || 0.2
-				username = options[:username] || nil
-				password = options[:password] || nil
+				username = options[:username]
+				password = options[:password]
 			end
 
 			@@cache = Dalli::Client.new(url, :expires_in => expires, 
@@ -32,9 +32,7 @@ module LJAPI
 					return @@cache.send(action, "#{operation}:#{username}", value) if CACHE_OPS.include?(operation)
 				end
 			rescue Dalli::RingError
-				nil
-			ensure
-				nil
+				return
 			end
 		end
 

@@ -98,7 +98,7 @@ module LJAPI
         end
 
         LJAPI::Cache.save(@request, @result)
-        
+
         return @result
       end
     end

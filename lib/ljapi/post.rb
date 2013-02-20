@@ -39,7 +39,7 @@ module LJAPI
           post.delete('props')
           post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(props) })
           post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(props,created) })
-          post.update({ 'tags' => LJAPI::Utils.get_tags(props) })
+          #post.update({ 'tags' => LJAPI::Utils.get_tags(props) })
         }
       end
     end
@@ -103,7 +103,7 @@ module LJAPI
         super('getevents', username, password)
         @request.update({
           'selecttype'  => 'one',
-          'notags'      => 'false',
+          'notags'      => 'true',
           'parseljtags' => 'true',
           'itemid'      => (post_id != -1 and post_id.to_i or -1),
           'usejournal'  => journal_id.to_s
@@ -172,12 +172,12 @@ module LJAPI
       end
       
       def run
-        return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
+        #return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
         super
         if @result[:success]
           @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @request['username']) }
           @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
-         LJAPI::Cache.save(@request, @result)
+         #LJAPI::Cache.save(@request, @result)
         end
         return @result
       end
@@ -190,7 +190,7 @@ module LJAPI
         super('getevents', username, password)
         @request.update({
           'lineendings'   => 'unix',
-          'notags'        => 'false',
+          'notags'        => 'true',
           'parseljtags'   => 'true'
         })
         @journal_count = LJAPI::Request::CountPosts.new(username, password).run

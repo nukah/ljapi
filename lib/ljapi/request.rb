@@ -1,8 +1,7 @@
 # -*- encoding : utf-8 -*-
 require "xmlrpc/client"
 require "digest/md5"
-
-DEBUG = false
+DEBUG = true
 
 module LJAPI
   module Request
@@ -71,8 +70,6 @@ module LJAPI
       end
 
       def run
-        return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
-
         connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
         connection.timeout = 60
         event = "LJ.XMLRPC.#{@operation}"
@@ -96,8 +93,6 @@ module LJAPI
           })
           @result.update({:data_full => data.inspect}) if (!result and DEBUG)
         end
-
-        LJAPI::Cache.save(@request, @result)
 
         return @result
       end

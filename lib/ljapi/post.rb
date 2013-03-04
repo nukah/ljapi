@@ -2,8 +2,23 @@
 require 'ljapi/request'
 require 'ljapi/utils'
 
+
 module LJAPI
   module Request
+    class Processing
+      def self.to_proc
+        lambda { |post|
+          post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
+          t_properties = post['props']
+          t_created = post['eventtime']
+          post.delete('props')
+          post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(t_properties) }) unless t_properties.nil?
+          post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(t_properties,t_created) }) unless t_properties.nil?
+          post.update({ 'censored' => LJAPI::Utils.check_censore(post) })
+        }
+      end
+    end
+
     class Encode
       def self.to_proc
         lambda { |post|
@@ -116,6 +131,7 @@ module LJAPI
         if @result[:success]
             @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
             @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
+
         end
         return @result
       end
@@ -172,12 +188,11 @@ module LJAPI
       end
       
       def run
-        #return LJAPI::Cache.get(@request) if LJAPI::Cache.check_request(@request)
         super
         if @result[:success]
           @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @request['username']) }
-          @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
-         #LJAPI::Cache.save(@request, @result)
+          # @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
+          @result[:data]['events'].map!(&Processing).reject!(&DeEmbed)
         end
         return @result
       end

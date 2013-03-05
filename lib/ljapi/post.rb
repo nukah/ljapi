@@ -1,65 +1,33 @@
 # -*- encoding : utf-8 -*-
 require 'ljapi/request'
 require 'ljapi/utils'
+require 'nokogiri'
+require 'open-uri'
 
 
 module LJAPI
   module Request
-    class Processing
-      def self.to_proc
-        lambda { |post|
-          post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
-          t_properties = post['props']
-          t_created = post['eventtime']
-          post.delete('props')
-          post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(t_properties) }) unless t_properties.nil?
-          post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(t_properties,t_created) }) unless t_properties.nil?
-          post.update({ 'censored' => LJAPI::Utils.check_censore(post) })
-        }
-      end
-    end
 
-    class Encode
-      def self.to_proc
-        lambda { |post|
-          post.each { |k,v| 
-            k.to_s
-            v.to_s.force_encoding('utf-8').encode 
-          }
-        }
-      end
-    end
-    
-    class Censore
-      def self.to_proc
-        lambda { |post|
-          post.update({ 'censored' => LJAPI::Utils.check_censore(post) })
-        }
-      end
-    end
-    
-    class DeEmbed
-      def self.to_proc
-        lambda { |post| 
-          return LJAPI::Utils.check_video(post)
-        }
-      end
-    end
-    
-    class Properties
-      def self.to_proc
-        lambda { |post|
+    class Wrapper
+      def initialize(post)
+        Fiber.new { 
           props = post['props']
           created = post['eventtime']
+          url = post['url']
           post.delete('props')
-          post.update({ 'allow_comments' => LJAPI::Utils.allow_comments(props) })
-          post.update({ 'last_edit_date' => LJAPI::Utils.last_edit(props,created) })
-          #post.update({ 'tags' => LJAPI::Utils.get_tags(props) })
-        }
+
+          post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
+          page = Nokogiri::HTML(open(url))
+          page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
+          post.update({ 
+            'allow_comments' => LJAPI::Utils.allow_comments(props),
+            'last_edit_date' => LJAPI::Utils.last_edit(props,created),
+            'censored' => LJAPI::Utils.check_censore(post)
+          }) unless props.nil?
+          Fiber.yield
+        }.resume
       end
     end
-
-
     
     class AddPost < Req
       def initialize(username, password, subject, text, options = nil)
@@ -87,9 +55,9 @@ module LJAPI
         super('addcomment', username, password)
         @request.update({ 'journal' => journal }) if journal
         @request.update({
-          'body' => text.slice(0,4299),
-          'ditemid' => id,
-          'subject' => subject.slice(0,100)
+            'body' => text.slice(0,4299),
+            'ditemid' => id,
+            'subject' => subject.slice(0,100)
         })
       end
       
@@ -117,6 +85,7 @@ module LJAPI
         @username = journal_id
         super('getevents', username, password)
         @request.update({
+          'lineendings'   => 'unix',
           'selecttype'  => 'one',
           'notags'      => 'true',
           'parseljtags' => 'true',
@@ -129,9 +98,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-            @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @username) }
-            @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
-
+          @result[:data]['events'].each { |post| Wrapper.new(post) }
         end
         return @result
       end
@@ -166,7 +133,7 @@ module LJAPI
         @request.update({
           'lineendings'   => 'unix',
           'notags'        => 'false',
-          'parseljtags'   => 'true'
+          'parseljtags'   => 'false'
         })
         if options.has_key?('since')
           @request.update({
@@ -190,9 +157,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-          @result[:data]['events'].each { |post| LJAPI::Utils.convert_urls(post, @request['username']) }
-          # @result[:data]['events'].map!(&Encode).map!(&Properties).map!(&Censore).reject!(&DeEmbed)
-          @result[:data]['events'].map!(&Processing).reject!(&DeEmbed)
+          @result[:data]['events'].each { |post| Wrapper.new(post) }
         end
         return @result
       end

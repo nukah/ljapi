@@ -9,13 +9,14 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nukah"]
-  s.date = "2013-03-04"
+  s.date = "2013-03-05"
   s.description = ""
   s.email = "flow.energy@gmail.com"
   s.extra_rdoc_files = [
     "README.md"
   ]
   s.files = [
+    ".document",
     ".rspec",
     ".travis.yml",
     "Gemfile",
@@ -24,7 +25,9 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "lib/ljapi.rb",
+    "lib/ljapi/base/base.rb",
     "lib/ljapi/login.rb",
+    "lib/ljapi/models.rb",
     "lib/ljapi/models/journal.rb",
     "lib/ljapi/models/post.rb",
     "lib/ljapi/models/user.rb",
@@ -51,6 +54,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<ruby-prof>, [">= 0"])
       s.add_runtime_dependency(%q<jeweler>, [">= 0"])
       s.add_runtime_dependency(%q<activerecord-tableless>, ["~> 1.0"])
+      s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
       s.add_dependency(%q<rspec>, [">= 0"])
@@ -58,6 +62,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<ruby-prof>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<activerecord-tableless>, ["~> 1.0"])
+      s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
@@ -66,6 +71,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<ruby-prof>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<activerecord-tableless>, ["~> 1.0"])
+    s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end

@@ -17,8 +17,12 @@ module LJAPI
           post.delete('props')
 
           post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
-          page = Nokogiri::HTML(open(url))
-          page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
+          
+          if LJAPI::Utils.check_video(post)
+            page = Nokogiri::HTML(open(url))
+            page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
+          end
+
           post.update({ 
             'allow_comments' => LJAPI::Utils.allow_comments(props),
             'last_edit_date' => LJAPI::Utils.last_edit(props,created),

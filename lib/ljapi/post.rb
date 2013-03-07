@@ -17,7 +17,6 @@ module LJAPI
           post.delete('props')
 
           post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
-          
           if LJAPI::Utils.check_video(post)
             page = Nokogiri::HTML(open(url))
             page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
@@ -123,7 +122,7 @@ module LJAPI
       def run
         super
         if @result[:success]
-          return @result[:data]["events"][0]["itemid"].to_i
+          return @result[:data]["events"][0]["itemid"]
         else
           @result[:data] = "failure"
           return @result
@@ -178,21 +177,23 @@ module LJAPI
           'parseljtags'   => 'true'
         })
         @journal_count = LJAPI::Request::CountPosts.new(username, password).run
-        @journal_items = (1..@journal_count).to_a
+        @journal_items = (1..@journal_count.to_i).to_a
         @journal_posts = []
       end
 
       def run
-        if @journal_count > 100
-          while @journal_items.length > 0 do
-            @journal_posts.insert(-1, LJAPI::Request::GetPosts.new(@username, @password, { 
-              'itemids' => @journal_items.slice!(0,100).join(',') 
-            }).run[:data]['events'])
-          end
-          @result = { :success => true, :data => { 'events' => @journal_posts.flatten }}
-        else
-          @result = LJAPI::Request::GetPosts.new(@username,@password).run
-        end
+        @threads = []
+        (@journal_count.to_f/100.to_f).ceil.times { |thread|
+          @threads << Thread.new {
+            begin 
+              trequest = LJAPI::Request::GetPosts.new(@username, @password, { 'itemids' => @journal_items.shift(100).join(',') }).run
+              temp = trequest[:data]['events']
+              @journal_posts.push(temp)
+            end
+          }
+        }
+        @threads.each { |thr| thr.join }
+        @result = { :success => true, :data => { 'events' => @journal_posts.flatten }}
         return @result
       end
 

@@ -2,7 +2,7 @@
 require 'ljapi/request'
 require 'ljapi/utils'
 require 'nokogiri'
-require 'open-uri'
+require 'httparty'
 
 
 module LJAPI
@@ -18,7 +18,8 @@ module LJAPI
 
           post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
           if LJAPI::Utils.check_video(post)
-            page = Nokogiri::HTML(open(url))
+            response = HTTParty.get(url).body
+            page = Nokogiri::HTML(response)
             page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
           end
 

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "ljapi"
-  s.version = "0.2.0"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nukah"]
-  s.date = "2013-03-05"
+  s.date = "2013-03-07"
   s.description = ""
   s.email = "flow.energy@gmail.com"
   s.extra_rdoc_files = [
@@ -55,6 +55,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<jeweler>, [">= 0"])
       s.add_runtime_dependency(%q<activerecord-tableless>, ["~> 1.0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
+      s.add_runtime_dependency(%q<httparty>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
       s.add_dependency(%q<rspec>, [">= 0"])
@@ -63,6 +64,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<activerecord-tableless>, ["~> 1.0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
+      s.add_dependency(%q<httparty>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
@@ -72,6 +74,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<activerecord-tableless>, ["~> 1.0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
+    s.add_dependency(%q<httparty>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end

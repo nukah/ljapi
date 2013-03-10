@@ -79,7 +79,6 @@ module LJAPI
           attempts += 1
           result, data = connection.call2(event, @request)
           data.delete("skip") if data.class == Hash && data.key?("skip")
-        #rescue EOFError, RuntimeError, Errno::ECONNREFUSED => e
         rescue Exception => e
           sleep 5 and retry if(attempts < MAX_ATTEMPTS)
           err = e.message
@@ -87,6 +86,7 @@ module LJAPI
           if result == false
            error = ERROR_CODES[data.to_s].nil? ? err : ERROR_CODES[data.to_s]
           end
+          puts [result, error, data]
           @result.update({
             :success  => result,
             :data     => (result and data or error),

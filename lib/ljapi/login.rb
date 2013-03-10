@@ -10,7 +10,6 @@ module LJAPI
       
       def run
         super
-        @result.delete :data
         return @result
       end
     end

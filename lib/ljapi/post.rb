@@ -3,6 +3,7 @@ require 'ljapi/request'
 require 'ljapi/utils'
 require 'nokogiri'
 require 'httparty'
+require 'cgi'
 
 
 module LJAPI
@@ -18,10 +19,13 @@ module LJAPI
 
           post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
           if LJAPI::Utils.check_video(post)
+            videos = []
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)
-            post['event'] = Nokogiri::HTML(post['event']).to_html
-            page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a href=".+">View movie.<\/a>/, element.to_html); puts "REPLACED" }
+            page.css('.lj_embedcontent').each { |video| videos << video }
+            formatted_post = Nokogiri::HTML.fragment(CGI.unescape_html(post['event']))
+            formatted_post.xpath("//a[text() = 'View movie.']").each { |node| node.replace(videos.shift) }
+            post['event'] = formatted_post.to_html
           end
 
           post.update({ 

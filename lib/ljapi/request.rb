@@ -86,7 +86,6 @@ module LJAPI
           if result == false
            error = ERROR_CODES[data.to_s].nil? ? err : ERROR_CODES[data.to_s]
           end
-          puts [result, error, data]
           @result.update({
             :success  => result,
             :data     => (result and data or error),

@@ -20,7 +20,7 @@ module LJAPI
           if LJAPI::Utils.check_video(post)
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)
-            page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
+            page.css('.lj_embedcontent').each { |element| post['event'].sub!(/^<a\s.+>View movie.<\/a>$/, element.to_html) }
           end
 
           post.update({ 

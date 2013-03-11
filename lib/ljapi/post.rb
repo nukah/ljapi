@@ -3,7 +3,8 @@ require 'ljapi/request'
 require 'ljapi/utils'
 require 'nokogiri'
 require 'httparty'
-
+require 'cgi'
+require 'sanitize'
 
 module LJAPI
   module Request
@@ -20,7 +21,12 @@ module LJAPI
           if LJAPI::Utils.check_video(post)
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)
-            page.css('.lj_embedcontent').each { |element| post['event'].sub!(/<a.*>View movie.<.*a>/, element.to_html) }
+            post['event'] = Sanitize.clean(CGI.unescape_html(post['event']), 
+              :elements => %w[ a b blockquote br cite code dd div dl dt em i li ol p pre strong u ul ],
+              :attributes => { 'a' => ['href'] },
+              :protocols => { 'a' => {'href' => ['ftp', 'http', 'https', 'mailto', :relative] } },
+              :remove_contents => true)
+            page.css('.lj_embedcontent').each { |video| post['event'].sub!(/<a([^>]+)>View movie.<\/a>/, video.to_html) }
           end
 
           post.update({ 

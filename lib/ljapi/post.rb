@@ -22,8 +22,8 @@ module LJAPI
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)
             post['event'] = Sanitize.clean(CGI.unescape_html(post['event']), 
-              :elements => %w[ a b blockquote br cite code dd div dl dt em i li ol p pre strong u ul ],
-              :attributes => { 'a' => ['href'] },
+              :elements => %w[ a b blockquote br cite code img dd div dl dt em i li ol p pre strong u ul ],
+              :attributes => { 'a' => ['href'], 'img' => ['src'], 'div' => ['style'] },
               :protocols => { 'a' => {'href' => ['ftp', 'http', 'https', 'mailto', :relative] } },
               :remove_contents => true)
             page.css('.lj_embedcontent').each { |video| post['event'].sub!(/<a([^>]+)>View movie.<\/a>/, video.to_html) }

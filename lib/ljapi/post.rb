@@ -25,7 +25,7 @@ module LJAPI
               :elements => %w[ a b blockquote br cite code img dd div dl dt em i li ol p pre strong u ul ],
               :attributes => { 'a' => ['href'], 'img' => ['src'], 'div' => ['style'] },
               :protocols => { 'a' => {'href' => ['ftp', 'http', 'https', 'mailto', :relative] } },
-              :remove_contents => %w[ form ])
+              :remove_contents => %w[ form script ])
             page.css('.lj_embedcontent').each { |video| post['event'].sub!(/<a([^>]+)>View movie.<\/a>/, video.to_html) }
           end
 

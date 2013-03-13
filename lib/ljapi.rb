@@ -4,6 +4,7 @@ Bundler.setup(:default)
 require 'ljapi/request'
 require 'ljapi/login'
 require 'ljapi/post'
+require 'ljapi/models'
 
 module LJAPI
 end

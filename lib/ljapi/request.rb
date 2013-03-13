@@ -1,12 +1,9 @@
 # -*- encoding : utf-8 -*-
 require "xmlrpc/client"
-require "digest/md5"
-DEBUG = true
+require 'ljapi/base'
 
 module LJAPI
   module Request
-    
-    MAX_ATTEMPTS = 5
     ERROR_CODES = {
       "Invalid username" => 100,
       "Invalid password" => 101,
@@ -48,63 +45,48 @@ module LJAPI
     class LJException < Exception
     end
     
-    class Req
-      def initialize(operation, username = nil, password = nil)
-        @operation = operation
-        @request = {
-          "clientversion" => "Ruby",
-          "ver" => "1",
-          "operation" => self.class.to_s.split("::").last.downcase,
-        }
-        @result = {}
-        if username && password
-          challenge = Challenge.new.run
-          response = Digest::MD5.hexdigest(challenge + password.to_s)
-          @request.update({
-            "username" => username.to_s,
-            "auth_method" => "challenge",
-            "auth_challenge" => challenge,
-            "auth_response" => response,
-            })
-        end
+    class Connection
+      def initialize request = nil, response = nil
+        @request = request
+        partial = @request.partial
+        @response = ResponseObject.new(partial)
+        @connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
+        @connection.timeout = 60
+        @operation = name(@request.operation || 'getchallenge')
+        Fiber.new {
+          attempts = 0
+          begin
+            attempts += 1
+            bool, response = @connection.call2_async(@operation, @request)
+            response.delete("skip") if response.class == Hash && response.key?("skip")
+          rescue Exception => e
+            sleep 5 and retry if(attempts < 5)
+          ensure
+            error = ERROR_CODES[response.to_s] if !bool
+            @response.form(success: bool, response: response, error: error)
+            Fiber.yield @response
+        }.resume
       end
 
-      def run
-        connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
-        connection.timeout = 60
-        event = "LJ.XMLRPC.#{@operation}"
-        attempts = 0
+      private
 
-        begin
-          attempts += 1
-          result, data = connection.call2(event, @request)
-          data.delete("skip") if data.class == Hash && data.key?("skip")
-        rescue Exception => e
-          sleep 5 and retry if(attempts < MAX_ATTEMPTS)
-          err = e.message
-        ensure
-          if result == false
-           error = ERROR_CODES[data.to_s].nil? ? err : ERROR_CODES[data.to_s]
-          end
-          @result.update({
-            :success  => result,
-            :data     => (result and data or error),
-          })
-          @result.update({:data_full => data.inspect}) if (!result and DEBUG)
-        end
-
-        return @result
+      def name method
+        "LJ.XMLRPC.#{method.to_s}"
       end
     end
-    
-    class Challenge < Req
-      def initialize
-        super("getchallenge")
+
+    class Req
+      def initialize(operation, user, options)
+        @user = user
+        #@type = self.class.to_s.split("::").last.downcase
+        @operation = operation
+
+        @challenge = Connection.new()
+        @request = RequestObject.new(@user, @operation).challenge(@challenge)
       end
-      
+
       def run
-        super
-        return @result[:data]["challenge"]
+        @response = Connection.new(@request)
       end
     end
   end

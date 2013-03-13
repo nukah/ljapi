@@ -1,3 +1,5 @@
-require 'models/journal'
-require 'models/post'
-require 'models/user'
+require 'active_record'
+require 'activerecord-tableless'
+require 'ljapi/models/journal'
+require 'ljapi/models/post'
+require 'ljapi/models/user'

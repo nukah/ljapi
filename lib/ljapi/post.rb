@@ -17,12 +17,19 @@ module LJAPI
           url = post['url']
           post.delete('props')
 
-          post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
+          post.each { |k,v| 
+            k.to_s
+            v.to_s.force_encoding('utf-8').encode
+            if %w[event subject].include?(k)
+              v = CGI.unescape_html(v)
+            end
+          }
           post['subject'] = Sanitize.clean(post['subject'], :elements => %w[])
+          post['event'].gsub!(/\n/, '<br/>')
           if LJAPI::Utils.check_video(post)
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)
-            post['event'] = Sanitize.clean(CGI.unescape_html(post['event']), 
+            post['event'] = Sanitize.clean(post['event'], 
               :elements => %w[ a b blockquote br cite code img dd div dl dt em i li ol p pre strong u ul ],
               :attributes => { 'a' => ['href'], 'img' => ['src'], 'div' => ['style'] },
               :protocols => { 'a' => {'href' => ['ftp', 'http', 'https', 'mailto', :relative] } },

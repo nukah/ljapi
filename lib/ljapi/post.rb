@@ -3,7 +3,7 @@ require 'ljapi/request'
 require 'ljapi/utils'
 require 'nokogiri'
 require 'httparty'
-require 'cgi'
+require 'hpricot'
 require 'sanitize'
 
 module LJAPI
@@ -18,10 +18,9 @@ module LJAPI
           post.delete('props')
 
           post.each { |k,v| 
-            k.to_s
             v.to_s.force_encoding('utf-8').encode
             if %w[event subject].include?(k)
-              v = CGI.unescape_html(v)
+              post[k] = Hpricot.uxs(v)
             end
           }
           post['subject'] = Sanitize.clean(post['subject'], :elements => %w[])

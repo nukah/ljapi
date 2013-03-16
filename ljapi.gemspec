@@ -57,6 +57,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<httparty>, [">= 0"])
       s.add_runtime_dependency(%q<sanitize>, [">= 0"])
+      s.add_runtime_dependency(%q<hpricot>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
       s.add_dependency(%q<rspec>, [">= 0"])
@@ -67,6 +68,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<httparty>, [">= 0"])
       s.add_dependency(%q<sanitize>, [">= 0"])
+      s.add_dependency(%q<hpricot>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
@@ -78,6 +80,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<httparty>, [">= 0"])
     s.add_dependency(%q<sanitize>, [">= 0"])
+    s.add_dependency(%q<hpricot>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end

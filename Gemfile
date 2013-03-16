@@ -8,6 +8,7 @@ gem "activerecord-tableless", "~> 1.0"
 gem 'nokogiri'
 gem 'httparty'
 gem 'sanitize'
+gem 'hpricot'
 group :development do
     gem 'ruby-prof'
 end

@@ -18,6 +18,7 @@ module LJAPI
           post.delete('props')
 
           post.each { |k,v| k.to_s; v.to_s.force_encoding('utf-8').encode }
+          post['subject'] = Sanitize.clean(post['subject'], :elements => %w[])
           if LJAPI::Utils.check_video(post)
             response = HTTParty.get(url).body
             page = Nokogiri::HTML(response)

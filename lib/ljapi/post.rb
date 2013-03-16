@@ -44,7 +44,7 @@ module LJAPI
     
     class GetPost < Req
       def initialize(username, password, journal = username, post_id = -1)
-        @user = LJAPI::Models::User.new(username, password)
+        @user = LJAPI::Models::User.new(username: username, password: password)
         super('getevents', @user)
         @request.update({
           selecttype: 'one',
@@ -71,7 +71,7 @@ module LJAPI
     
     class GetPosts < Req
       def initialize(username, password, options = {})
-        @user = LJAPI::Models::User.new(username, password)
+        @user = LJAPI::Models::User.new(login: username, password: password)
         super('getevents', @user)
         if options.has_key?('since')
           @request.update({
@@ -98,7 +98,7 @@ module LJAPI
 
     class ImportPosts < Req
       def initialize(username, password)
-        @user = LJAPI::Models::User.new(username, password)
+        @user = LJAPI::Models::User.new(login: username, password: password)
         super('getevents', username, password)
         @journal_count = LJAPI::Request::CountPosts.new(@user.username, @user.password).run
         @journal_items = (1..@journal_count).to_a

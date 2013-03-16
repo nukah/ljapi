@@ -4,7 +4,8 @@ gem 'rake'
 gem 'jeweler'
 gem "activerecord-tableless", "~> 1.0"
 gem 'nokogiri'
-gem 'httparty'
+gem 'faraday'
+gem 'em-http-request'
 gem 'sanitize'
 
 group :development do

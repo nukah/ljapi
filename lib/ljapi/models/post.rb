@@ -1,4 +1,6 @@
+# -*- encoding : utf-8 -*-
 require 'cgi'
+
 module LJAPI
   module Models
     class Post < ActiveRecord::Base

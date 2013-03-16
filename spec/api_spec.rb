@@ -22,43 +22,43 @@ describe 'LiveJournal API' do
 
 	end
 	
-	describe LJAPI::Request::GetPosts do
+	# describe LJAPI::Request::GetPosts do
 
-		before :each, :authorized => true do
-			request = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password]).run
-			@results = request[:data]['events']
-		end
+	# 	before :each, :authorized => true do
+	# 		request = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password]).run
+	# 		@results = request[:data]['events']
+	# 	end
 
-	  	it "should return array of posts", :authorized => true do
-		    @results.should be_a_kind_of(Array)
-		    @results.size.should be > 10
-	  	end
+	#   	it "should return array of posts", :authorized => true do
+	# 	    @results.should be_a_kind_of(Array)
+	# 	    @results.size.should be > 10
+	#   	end
 
-		it "should have posts encoded and has specific fields", :authorized => true do
-			@results.first.keys.should include('subject', 'event', 'ditemid', 'allow_comments', 'censored', 'last_edit_date')
-		end
+	# 	it "should have posts encoded and has specific fields", :authorized => true do
+	# 		@results.first.keys.should include('subject', 'event', 'ditemid', 'allow_comments', 'censored', 'last_edit_date')
+	# 	end
 
-		it "should retrieve posts since specific date" do
-			result = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password], { 'since' => '07.03.2012' }).run
-			result[:data]['events'].size.should be > 3
-			result[:data]['events'].first['itemid'].should == 4
-			Date.parse(result[:data]['events'].first['eventtime']).should be >= Date.parse('06.03.2012')
-		end
+	# 	it "should retrieve posts since specific date" do
+	# 		result = LJAPI::Request::GetPosts.new(@credentials[:login], @credentials[:password], { 'since' => '07.03.2012' }).run
+	# 		result[:data]['events'].size.should be > 3
+	# 		result[:data]['events'].first['itemid'].should == 4
+	# 		Date.parse(result[:data]['events'].first['eventtime']).should be >= Date.parse('06.03.2012')
+	# 	end
 
-	end
+	# end
 
-	describe LJAPI::Request::AccessCheck do
+	# describe LJAPI::Request::AccessCheck do
 
-		it "should return success" do
-			request = LJAPI::Request::AccessCheck.new(@credentials[:login], @credentials[:password]).run
-			request.should include(:success)
-			request[:success].should == true
-		end
+	# 	it "should return success" do
+	# 		request = LJAPI::Request::AccessCheck.new(@credentials[:login], @credentials[:password]).run
+	# 		request.should include(:success)
+	# 		request[:success].should == true
+	# 	end
 
-		it "should fail on wrong creds" do
-		  	request = LJAPI::Request::AccessCheck.new('fail', 'login').run
-		  	request[:success].should == false
-		end
+	# 	it "should fail on wrong creds" do
+	# 	  	request = LJAPI::Request::AccessCheck.new('fail', 'login').run
+	# 	  	request[:success].should == false
+	# 	end
 
-	end
+	# end
 end

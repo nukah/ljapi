@@ -42,29 +42,29 @@ module LJAPI
       "Account data format on server is old and needs to be upgraded" => 505,
       "Journal sync is temporarily unavailable" => 506
     }
-    class LJException < Exception
-    end
     
     class Connection
-      def initialize request = nil, response = nil
-        @request = request
-        partial = @request.partial
-        @response = ResponseObject.new(partial)
-        @connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
-        @connection.timeout = 60
-        @operation = name(@request.operation || 'getchallenge')
-        Fiber.new {
+      attr_reader :response
+      def initialize request_object = nil
+        request = (request_object || LJAPI::Base::RequestObject.new)
+
+        operation = name(request.operation)
+        connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
+        connection.timeout = 60
+
+        @response = Fiber.new {
           attempts = 0
           begin
             attempts += 1
-            bool, response = @connection.call2_async(@operation, @request)
-            response.delete("skip") if response.class == Hash && response.key?("skip")
-          rescue Exception => e
-            sleep 5 and retry if(attempts < 5)
-          ensure
-            error = ERROR_CODES[response.to_s] if !bool
-            @response.form(success: bool, response: response, error: error)
-            Fiber.yield @response
+            call_result, call_response = connection.call2(operation, request.to_h)
+          # rescue Exception => e
+          #   sleep 5 and retry if(attempts < 5)
+          #   puts e.message
+          
+            error = ERROR_CODES[response.to_s] if !call_result
+            response = LJAPI::Base::ResponseObject.new(operation, call_result, call_response, error)
+            Fiber.yield response
+          end
         }.resume
       end
 
@@ -76,17 +76,13 @@ module LJAPI
     end
 
     class Req
-      def initialize(operation, user, options)
-        @user = user
-        #@type = self.class.to_s.split("::").last.downcase
-        @operation = operation
-
-        @challenge = Connection.new()
-        @request = RequestObject.new(@user, @operation).challenge(@challenge)
+      def initialize(operation, user, options = nil)
+        chal = Connection.new.response
+        @request = LJAPI::Base::RequestObject.new(user, operation).challenge(chal)
       end
 
       def run
-        @response = Connection.new(@request)
+        Connection.new(@request).response
       end
     end
   end

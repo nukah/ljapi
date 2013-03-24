@@ -5,6 +5,7 @@ require 'nokogiri'
 require 'httparty'
 require 'hpricot'
 require 'sanitize'
+require 'parallel'
 
 module LJAPI
   module Request
@@ -190,24 +191,16 @@ module LJAPI
           'notags'        => 'true',
           'parseljtags'   => 'true'
         })
-        @journal_count = LJAPI::Request::CountPosts.new(username, password).run
-        @journal_items = (1..@journal_count.to_i).to_a
+        journal_count = LJAPI::Request::CountPosts.new(username, password).run
+        @journal_items = (1..journal_count.to_i).each_slice(100).map { |a| a.join(',') }
         @journal_posts = []
       end
 
       def run
-        @threads = []
-        (@journal_count.to_f/100.to_f).ceil.times { |thread|
-          @threads << Thread.new {
-            begin 
-              trequest = LJAPI::Request::GetPosts.new(@username, @password, { 'itemids' => @journal_items.shift(100).join(',') }).run
-              temp = trequest[:data]['events']
-              @journal_posts.push(temp)
-            end
-          }
+        posts = Parallel.map(@journal_items, :in_processes => 4) { |block| 
+          LJAPI::Request::GetPosts.new(@username, @password, { 'itemids' => block }).run[:data]['events']
         }
-        @threads.each { |thr| thr.join }
-        @result = { :success => true, :data => { 'events' => @journal_posts.flatten }}
+        @result = { :success => true, :data => { 'events' => posts.flatten }}
         return @result
       end
 

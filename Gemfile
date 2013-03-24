@@ -9,6 +9,7 @@ gem 'nokogiri'
 gem 'httparty'
 gem 'sanitize'
 gem 'hpricot'
+gem 'parallel'
 group :development do
     gem 'ruby-prof'
 end

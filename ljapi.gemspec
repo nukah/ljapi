@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "ljapi"
-  s.version = "0.4.0"
+  s.version = "0.5.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nukah"]
-  s.date = "2013-03-16"
+  s.date = "2013-03-24"
   s.description = ""
   s.email = "flow.energy@gmail.com"
   s.extra_rdoc_files = [
@@ -58,6 +58,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<httparty>, [">= 0"])
       s.add_runtime_dependency(%q<sanitize>, [">= 0"])
       s.add_runtime_dependency(%q<hpricot>, [">= 0"])
+      s.add_runtime_dependency(%q<parallel>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
       s.add_dependency(%q<rspec>, [">= 0"])
@@ -69,6 +70,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<httparty>, [">= 0"])
       s.add_dependency(%q<sanitize>, [">= 0"])
       s.add_dependency(%q<hpricot>, [">= 0"])
+      s.add_dependency(%q<parallel>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
@@ -81,6 +83,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<httparty>, [">= 0"])
     s.add_dependency(%q<sanitize>, [">= 0"])
     s.add_dependency(%q<hpricot>, [">= 0"])
+    s.add_dependency(%q<parallel>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end

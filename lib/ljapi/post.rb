@@ -193,11 +193,10 @@ module LJAPI
         })
         journal_count = LJAPI::Request::CountPosts.new(username, password).run
         @journal_items = (1..journal_count.to_i).each_slice(100).map { |a| a.join(',') }
-        @journal_posts = []
       end
 
       def run
-        posts = Parallel.map(@journal_items, :in_processes => 4) { |block| 
+        posts = Parallel.map(@journal_items) { |block| 
           LJAPI::Request::GetPosts.new(@username, @password, { 'itemids' => block }).run[:data]['events']
         }
         @result = { :success => true, :data => { 'events' => posts.flatten }}

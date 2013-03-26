@@ -1,6 +1,8 @@
 # -*- encoding : utf-8 -*-
 require "xmlrpc/client"
 require 'ljapi/base'
+require 'eventmachine'
+require 'em-xmlrpc-client'
 
 module LJAPI
   module Request
@@ -45,44 +47,67 @@ module LJAPI
     
     class Connection
       attr_reader :response
-      def initialize request_object = nil
-        request = (request_object || LJAPI::Base::RequestObject.new)
-
-        operation = name(request.operation)
-        connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
-        connection.timeout = 60
-
-        @response = Fiber.new {
-          attempts = 0
-          begin
-            attempts += 1
-            call_result, call_response = connection.call2(operation, request.to_h)
-          # rescue Exception => e
-          #   sleep 5 and retry if(attempts < 5)
-          #   puts e.message
-          
-            error = ERROR_CODES[response.to_s] if !call_result
-            response = LJAPI::Base::ResponseObject.new(operation, call_result, call_response, error)
-            Fiber.yield response
-          end
-        }.resume
+      def self.connect operation = nil, request
+        xml_operation = convert_name_to_xmlrpc_method(operation)
+        EM.run do 
+          Fiber.new do
+            connection = XMLRPC::Client.new("www.livejournal.com", "/interface/xmlrpc")
+            connection.timeout = "60"
+            call_status, call_response = connection.call2(xml_operation, request)
+            error = call_status ? false : ERROR_CODES[call_response.to_s]
+            @response = LJAPI::Base::ResponseObject.new(operation, call_status, call_response, error)
+            EM.stop
+          end.resume
+        end
+        @response
       end
 
       private
 
-      def name method
+      def self.convert_name_to_xmlrpc_method method
         "LJ.XMLRPC.#{method.to_s}"
       end
     end
 
     class Req
-      def initialize(operation, user, options = nil)
-        chal = Connection.new.response
-        @request = LJAPI::Base::RequestObject.new(user, operation).challenge(chal)
+      def initialize(operation, *options)
+        options = options.first if options.any?
+        @operation = operation
+        @request = { 
+          client: "Lanshera API",
+          client_version: 1,
+          line_endings: 'unix',
+          notags: 'false',
+          parseljtags: 'true',
+        }
+        @request.merge!(options) if options.any?
+        unless operation == 'getchallenge'
+          raise ArgumentError unless (options.include?(:username) || options.include?(:password))
+          chal = Challenge.new.run
+          username = options[:username] if options.has_key?(:username)
+          password = options[:password] if options.has_key?(:password)
+          auth = Digest::MD5.hexdigest(chal.challenge + password)
+          @request.update({
+            auth_method: 'challenge',
+            auth_challenge: chal.challenge,
+            auth_response: auth
+          })
+        end
       end
 
       def run
-        Connection.new(@request).response
+        @response = Connection.connect(@operation, @request)
+        @response
+      end
+    end
+
+    class Challenge < Req
+      def initialize
+        super('getchallenge')
+      end
+
+      def run
+        super
       end
     end
   end

@@ -12,7 +12,8 @@ module LJAPI
 
       after_initialize :prepare
 
-      serialize :props, OpenStruct
+      attr_accessor :props
+
       column :id, :integer
       column :subject, :string
       column :text, :string
@@ -31,7 +32,7 @@ module LJAPI
       def prepare
         self.text = CGI.unescape_html(self.text)
         self.commentable = (self.props.include?('opt_nocomments') || self.props.include?('opt_lockcomments')) ? false : true
-        self.last_edit = self.props.include?('revtime') ? Time.at(self.props.revtime).strftime('%Y-%m-%d %H:%M:%S') : self.created
+        self.last_edit = self.props.include?('revtime') ? Time.at(self.props['revtime']).strftime('%Y-%m-%d %H:%M:%S') : self.created
         self.censored = CENSORE.match(self.text) ? true : false
         self.has_video = VIDEO.match(self.text) ? true : false
       end

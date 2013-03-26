@@ -41,24 +41,20 @@ module LJAPI
         super
       end
     end
-    
-    class GetPost < Req
-      def initialize(username, password, journal = username, post_id = -1)
-        @user = LJAPI::Models::User.new(username: username, password: password)
-        super('getevents', @user)
-        @request.update({
-          selecttype: 'one',
-          usejournal: journal,
-          itemid: post_id
-        })
+
+    class Retrieve < Req
+      def initialize(username, password, post = nil, journal = nil)
+        post ||= -1
+        journal ||= username
+        super('getevents', selecttype: 'one', username: username, password: password, itemid: post, usejournal: journal)
       end
-      
+
       def run
         super
       end
     end
-
-    class CountPosts < GetPost
+    
+    class Count < Retrieve
       def initialize(username, password)
         super
       end

@@ -4,9 +4,12 @@ gem 'rake'
 gem 'jeweler'
 gem "activerecord-tableless", "~> 1.0"
 gem 'nokogiri'
-gem 'faraday'
-gem 'em-http-request'
+gem 'hpricot'
+gem 'parallel'
 gem 'sanitize'
+gem 'faraday'
+gem 'em-xmlrpc-client'
+gem 'em-http-request'
 
 group :development do
     gem 'ruby-prof'
